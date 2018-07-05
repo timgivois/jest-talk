@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Snapshots filters items 1`] = `
+Array [
+  Object {
+    "name": "bread",
+  },
+  Object {
+    "name": "beans",
+  },
+]
+`;

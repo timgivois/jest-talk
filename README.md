@@ -1,26 +1,25 @@
 # Jest + Enzyme
+Testing your code is probably one of the most important things to do in software engineering. With testing we ensure quality of what we are building. There are many ways to test code, from end to end testing (manual testing) to unit testing (component testing in React). In this doc, we’ll cover some of the most common and effective ways to test React code using Jest, Enzyme and other great tools.
 
-# Agenda
-- Introduction
-- Why Jest
-- Jest Matchers
-- Mocks
-- Why Enzyme
-- Snapshot Testing
 
-# Introduction
+## Testing pyramid
+In Agile frameworks, automated testing can be grouped into a testing pyramid. With this we can know when and where should we use one testing method or another. As seen in the pyramid, many unit-snapshot tests can be used to validate one integration test, and many integration tests can be used to validate one manual test. At the peak of the pyramid, we have the end-to-end test: manual testing of the whole application. The idea of choosing what type of tests should be used is important, as we may be testing the same thing in three different levels.
 
-```WE MUST TEST!```
+Manual testing is very slow and unmaintainable. As a starting point, we may want this type of testing in our frontend applications because they mimic how the user will see and act to our application. The problem with this is that it has a high cost of maintenance (every UI minor change may break the tests, as this tests are normally done with Selenium) and the speed to develop one of this tests may be high. It’s important to note that we don’t usually use this type of testing in frontend applications for his high costs.
 
-# Why Jest (unit testing alternatives)
+Integration testing may be good to test connections between components and finding bugs in these liaisons. For example, let’s imagine we want to test that a parent component passes specific props to a child whenever a user clicks a button. The cost of maintaining and doing this tests are not very high and will test parts that we don’t tend to test with unit tests.
+
+Unit/Snapshot testing is probably the most easy way to test components. We only care in one isolated item and its logic. If we follow the presentation-functional components division, it will even be easier to tests this. For presentational components, we’ll give the props to the component and expect a specific render (could be a good use case for snapshot). For functional testing, the tests can be more tricky, we’ll need mock a redux store to create user actions and expect redux actions to be called while we simulate events.
+
+As rule of thumb, start with unit/snapshot testing. Pass to integration test only if necessary. Try to avoid Manual/UI Testing. For the first two steps of the pyramid, we can use Jest as our main testing tool.
+
+# Why Jest ?
 
 ### About Jest
 
-- Jest is a testing framework created by Facebook. They use it to test JavaScript and React code.
-- It was created under the premise of Performance, Features and Adoptability.
-- Jest provides an integrated "zero-configuration" experience. This is a differentiator with other popular testing frameworks like Mocha.
+Jest is a testing framework created by Facebook. They use it to test JavaScript and React code. It was created under the premise of performance, features and adoptability. Jest provides an integrated “zero-configuration” experience. This is a differentiator with other popular testing frameworks like Mocha. Some of his killer features are:
 
-### Some Killer Features
+Killer features:
 
 - **Instant Feedback:** Immersive Watch mode runs only test files related to changed files.
 - **Fast and sandboxed:**  It parallelizes test runs across workers and console messages are buffered and print together.
@@ -28,24 +27,21 @@
 - **Built-in code coverage reports:** Supports --coverage for bringing out of the box coverage reports.
 - **Zero configuration**
 
-# Jest Matchers
+## Jest Matchers
 
 ### Common Matchers
+
+Matchers are the most basic unit for testing in Jest. They are used to assert that an expected object is equal, close to, greater/less than, contains or any other logical connection to another output object. We can create different constructions with these logical connections. For more reference, check Jest documentation.
 
 - `toBe`: It uses `Object.is` to test exact equality.
 - `toEqual`: It recursively checks every field of an object or array.
 -  `not`: Tests for the opposite of a matcher
 
 ```
-test('object assignment', () => {
-  const data = {one: 1};
-  data['two'] = 2;
-  expect(data).toEqual({one: 1, two: 2});
-});
-
-test('increasing  a positive number is not zero', () => {
-	let a = 1;
-	expect(a + 1).not.toBe(0);
+test(‘object assignment’, () => {
+ const data = {one: 1};
+ data[‘two’] = 2;
+ expect(data).toEqual({one: 1, two: 2});
 });
 ```
 
@@ -93,6 +89,7 @@ test('there are some coders there', () => {
 
 - **Arrays**
 	- `toContain`: It checks if the array has any particular item
+
 ```
 const coders = [
 	'BDragon',
@@ -126,7 +123,7 @@ test('compiling android goes as expected', () => {
 });
 ```
 
-# Mocks
+## Mocks
 
 There are two ways to mock functions: Either by creating a mock function to use in test code, or writing a manual mock to override a module dependency.
 
@@ -147,151 +144,132 @@ expect(mockCallback.mock.calls.length).toBe(3);
 expect(mockCallback.mock.calls[0][0]).toBe(0);
 ```
 
+## Setup and teardown
 
-# Why Enzyme
-
-- Enzyme is a testing utility from Airbnb which is a perfect match to test React Applications.
-- Test the state of a React render tree can include a lot of boilerplate code. This is not good for testing purposes and clean code.
-- Enzyme uses several of the utilities provided by React to build its API. The API reduces boilerplate code and the reduces the coupling between your tests.
-
-### Enzyme Modes
-- `Shallow`: Shallow rendering is useful to constrain yourself to testing a component as a unit, and to ensure that your tests aren't indirectly asserting on behavior of child components.
-- `Mount`: Full DOM rendering is ideal for use cases where you have components that may interact with DOM APIs.  Full rendering actually mounts the component in the DOM. This is the only way to test  componentDidMount and componentDidUpdate.
-- `Render`: Full rendering and it doesn't need an environment like a "browser". This is useful when you want to test the children with less overhead than `mount`.
-
-### More useful API methods: find, simulate and filter.
-
-#### .find(selector) => ShallowWrapper
-
-Finds every node in the render tree of the current wrapper that matches the provided selector.
-#### .filter(selector) => ShallowWrapper
-
-Returns a new wrapper with only the nodes of the current wrapper that match the provided selector.
-#### .simulate(event[, ...args]) => Self
-
-Simulate events
-
-### Example
+A good practice in Jest is organizing data in blocks. For this, we can use `describe` function that receives two arguments: the block name a function that will either have more organized blocks or test functions. To make it more modularized, Jest provides a set of functions that will control code execution before and after the set of tests are run.
 
 ```
-import React from 'react';
+describe('City Database', () => {
+    beforeAll(() => {
+        initEnvironment()
+    })
 
-class ToDoItem extends React.Component {
-  render() {
-    const { item, onCompleteChange } = this.props;
-    return (
-      <div className="item">
-        <span className="item-mark">{item.complete ? '✓' : '•'}</span>
-        <span className="item-title">{item.title}</span>
-        <a className="item-button" onClick={() => onCompleteChange(item, !item.complete)}>
-          Mark as {item.complete ? 'Pending' : 'Complete'}
-        </a>
-      </div>
-    );
-  }
-}
+    beforeEach(() => {
+        initCityDB()
+    })
+
+    afterEach(() => {
+        clearCityDB()
+    })
+
+    test('has Vienna', () => {
+        expect(isCity('Vienna').toBeTruthy())
+    })
+
+    test('has San Juan', () => {
+        expect(isCity('San Juan').toBeTruthy())
+    })
+})
 ```
-
-```
-import React from 'react';
-
-class ToDoList extends React.Component {
-  render() {
-    const { items, onChange } = this.props;
-    return (
-      <div className="todo-list">
-        {items.map(item => <ToDoItem key={item.id} item={item} onCompleteChange={onChange} />)}
-      </div>
-    );
-  }
-}
-```
-
-```
-import React from 'react';
-import {shallow} from 'enzyme';
-import ToDoItem from './components/ToDoItem';
-import ToDoList from './components/ToDoList';
-
-function mockItem() {
-	// return mocked object
-}
-describe('Test ToDoItem Component', () => {
-	it('renders the title', () => {
-      const defaultItem = mockItem();
-      const wrapper = shallow(<ToDoItem item={item} />);
-      expect(wrapper.text()).toBe(item.title);
-  });
-
-  it('renders a check mark when complete', () => {
-    const item = mockItem({ complete: true });
-    const wrapper = shallow(<ToDoItem item={item} />);
-    expect(wrapper.find('.item-mark').text()).to.equal('✓');
-  });
-});
-
-```
-
-```
-import React from 'react';
-import { shallow } from 'enzyme';
-import ToDoList from '../components/ToDoList';
-import ToDoItem from '../components/ToDoItem';
-
-describe('<ToDoList />', () => {
-  it('renders the entire list of items', () => {
-    const items = [mockItem(), mockItem()];
-    const wrapper = shallow(<ToDoList items={items} />);
-    expect(wrapper.find(ToDoList)).toHaveLength(items.length);
-  });
-});
-```
-
-### Recommendations
-
-- Start always with `shallow`
-- Use just `mount` when you want to test something related to the lifecycle.
-- Use `render` when you want to test the children.
 
 # Snapshots
 
-### What is a snapshot?
+The most complex part of writing unit tests in long-term projects are their maintenance. As project evolves, code evolves and naturally, tests evolve. Certain function or component may change its output deliberately and tests may need to adapt the assertions they have.A lot of time of this adaptation has repetitive tasks as we illustrate in image . 2. Snapshot testing is a way automate this process and create unit test that could be easily overwritten and managed through time. The main benefit of snapshot testing is that we can quickly create tests for black boxes without much configuration or pain and adapt them easily to changes.
 
-- According to the official docs: Snapshot tests are a very useful tool whenever you want to make sure your UI does not change unexpectedly.
-- This is a kind of new approach to test UIs or any serializable code.
-- You can use a test renderer to quickly generate a serializable value for your React tree. The first time this test is run, Jest creates a snapshot file that looks like this (Jest uses pretty-format to make snapshots human-readable during code review):
+Imagine that we have a function that filters a list of objects given a certain keyword. One of the tests could be wrote as follows:
 
 ```
-exports[`renders correctly 1`] = `
-  <rendered_html>
+test('function filters users', () => {
+    expect(filterUsers('b').toEqual([
+        { name: 'Becky' },
+        { name: 'Bob' },
+        { name: 'Bryan' },
+        { name: 'Bryce' }
+    ]))    
+})
+```
+
+But, what happens if we add users or change schema? We have to change the test, copying and pasting the assertion to make the test pass, the logic didn’t changed, only the expected output. This could happen again and again in a project. Snapshots are the solution to make this repetitive process automatic and autogenerated.
+
+```
+test('filters items', () => {
+    expect(filterUsers('b')).toMatchSnapshot()
+})
+```
+
+Jest has a built-in module that manages the creation and update of snapshots. It will save the snapshot in a directory `__snapshots__`. Whenever we run Jest, if that directory exists, it will compare the output with the saved output. If it’s different we can easily overwrite the saved snapshot or check in the code for a possible bug. The following is an autogenerated snapshot:
+
+```
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+exports[`Snapshots filters users 1`] = `
+Array [
+  Object {
+    "name": "Becky",
+  },
+  Object {
+    "name": "Bob",
+  },
+]
+`;
+```
+# Enzyme
+
+Everything we talked until now doesn’t have a direct connection with React. All the previous tools may be used to test the logic of our frontend application, but as we know, in frontend applications not everything is logic, we have a presentational part that should be tested. But, how can we test this? The rule of thumb is that we should test everything that isn’t static. In other words, we should test two things:
+
+Given a set of inputs (state & props), assert what a component should output (render).
+Given a user action, assert how the component behaves. The component might make a state update or call a prop-function passed to it by a parent.
+
+That is great, but if you think it twice, what will be the output of the presentational component that we’ll be testing or snapshoting. Yes, you are right, it will be the React Tree generated. Enzyme is the tool that we’ll use to easily without problems React Trees that could even be isolated (not rendering child components).
+
+Enzyme is a testing tool developed and managed by Airbnb. Enzyme uses several of the utilities provided by React to build its API. The API reduces boilerplate code.
+
+
+```
+import App from '../App'
+describe('App component', () => {
+  test('should shallow correctly', () => {
+      shallow(
+        <App />
+      ).toMatchSnapshot()
+  })
+  test('should mount correctly', () => {
+      render(
+        <App />
+      ).toMatchSnapshot()
+  })
+  test('should render correctly', () => {
+      mount(
+        <App />
+      ).toMatchSnapshot()
+  })
+})
 `;
 ```
 
-### Basic Example
+
+Enzyme has three methods for rendering React components. These methods give different results and we may use them in different cases. As a recommendation, it’s better to always start with Shallow. Use mount only when you need to test something related to the lifecycle. Render should be used when we want to test the children.
+
+Shallow: Shallow rendering is useful to constrain yourself to testing a component as a unit, and to ensure that your tests aren’t indirectly asserting on behavior of child components.
+Mount: Full rendering and it doesn’t need an environment like a “browser”. This is useful when you want to test the children with less overhead than mount.
+Render: Full DOM rendering is ideal for use cases where you have components that may interact with DOM APIs. Full rendering actually mounts the component in the DOM. This is the only way to test componentDidMount and componentDidUpdate.
+We have API methods for the three methods that may help us in our assertions. Two of the most important are simulate and find. The first one can simulate user events like click, hover, etc. The second method can find a children with a selector.
 
 ```
-import React from 'react';
-import { shallow } from 'enzyme';
-import { shallowToJson } from 'enzyme-to-json';
-import Image from '../components/Image';
-
-describe('Image', () => {
-  it('should render correctly', () => {
-    const output = shallow(
-      <Image title="mockTitle" url="mockUrl" />
-    );
-    expect(shallowToJson(output)).toMatchSnapshot();
-  });
-});
+describe('the user populates the input', () => {
+    const testem = 'Vancouver'
+    beforeEach(() => {
+        const input = wrapper.find('input').first()
+        input.simulate('change', {
+          target: { value: testem }
+        })
+      })
+  test('should update the state property `testem`', () => {
+        expect(
+          wrapper.state().testem
+        ).toEqual(testem)
+  })
+})
 ```
-
-# CLI
-// TODO Finish this
-
-
-# Final Excersice: Test Styled Components
-- **TODO** Create the exercise
-
 # Resources
 
 ### Talks

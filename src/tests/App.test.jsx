@@ -1,119 +1,124 @@
-import App from '../App'
-import React from 'react'
-import { shallow } from 'enzyme'
+/* leave first line blank for cq */
+import App from '../App';
+import React from 'react';
+import { shallow } from 'enzyme';
 
 describe('App', () => {
-  let wrapper
+  let wrapper;
 
   beforeEach(() => {
     wrapper = shallow(
       <App />
-    )
+    );
+  });
+
+  test('should match snapshot', () => {
+    expect(wrapper).toMatchSnapshot()
   })
 
-  test('should have the `th` "testems"', () => {
+  test('should have the `th` "Items"', () => {
     expect(
-      wrapper.contains(<th>testems</th>)
-    ).toBe(true)
-  })
+      wrapper.contains(<th>Items</th>)
+    ).toBe(true);
+  });
 
   test('should have a `button` element', () => {
     expect(
       wrapper.containsMatchingElement(
-        <button>Add testem</button>
+        <button>Add item</button>
       )
-    ).toBe(true)
-  })
+    ).toBe(true);
+  });
 
   test('should have an `input` element', () => {
     expect(
       wrapper.containsMatchingElement(
         <input />
       )
-    ).toBe(true)
-  })
+    ).toBe(true);
+  });
 
   test('`button` should be disabled', () => {
-    const button = wrapper.find('button').first()
+    const button = wrapper.find('button').first();
     expect(
       button.props().disabled
-    ).toBe(true)
-  })
+    ).toBe(true);
+  });
 
   describe('the user populates the input', () => {
-    const testem = 'Vancouver'
+    const item = 'Vancouver';
 
     beforeEach(() => {
-      const input = wrapper.find('input').first()
+      const input = wrapper.find('input').first();
       input.simulate('change', {
-        target: { value: testem }
-      })
-    })
+        target: { value: item }
+      });
+    });
 
-    test('should update the state property `testem`', () => {
+    test('should update the state property `item`', () => {
       expect(
-        wrapper.state().testem
-      ).toEqual(testem)
-    })
+        wrapper.state().item
+      ).toEqual(item);
+    });
 
     test('should enable `button`', () => {
-      const button = wrapper.find('button').first()
+      const button = wrapper.find('button').first();
       expect(
         button.props().disabled
-      ).toBe(false)
-    })
+      ).toBe(false);
+    });
 
     describe('and then clears the input', () => {
       beforeEach(() => {
-        const input = wrapper.find('input').first()
+        const input = wrapper.find('input').first();
         input.simulate('change', {
           target: { value: '' }
         })
-      })
+      });
 
       test('should disable `button`', () => {
-        const button = wrapper.find('button').first()
+        const button = wrapper.find('button').first();
         expect(
           button.props().disabled
-        ).toBe(true)
-      })
-    })
+        ).toBe(true);
+      });
+    });
 
-    describe('and then submtests the form', () => {
+    describe('and then submits the form', () => {
       beforeEach(() => {
-        const form = wrapper.find('form').first()
-        form.simulate('submtest', {
+        const form = wrapper.find('form').first();
+        form.simulate('submit', {
           preventDefault: () => {},
-        })
-      })
+        });
+      });
 
-      test('should add the testem to state', () => {
+      test('should add the item to state', () => {
         expect(
-          wrapper.state().testems
-        ).toContain(testem)
-      })
+          wrapper.state().items
+        ).toContain(item);
+      });
 
-      test('should render the testem in the table', () => {
+      test('should render the item in the table', () => {
         expect(
           wrapper.containsMatchingElement(
-            <td>{testem}</td>
+            <td>{item}</td>
           )
-        ).toBe(true)
-      })
+        ).toBe(true);
+      });
 
       test('should clear the input field', () => {
-        const input = wrapper.find('input').first()
+        const input = wrapper.find('input').first();
         expect(
           input.props().value
-        ).toEqual('')
-      })
+        ).toEqual('');
+      });
 
       test('should disable `button`', () => {
-        const button = wrapper.find('button').first()
+        const button = wrapper.find('button').first();
         expect(
           button.props().disabled
-        ).toBe(true)
-      })
-    })
-  })
-})
+        ).toBe(true);
+      });
+    });
+  });
+});

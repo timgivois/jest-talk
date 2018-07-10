@@ -270,6 +270,7 @@ describe('the user populates the input', () => {
   })
 })
 ```
+
 # Resources
 
 ### Talks
